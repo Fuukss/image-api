@@ -31,6 +31,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+
+    # My apps
+    'api',
+    'account',
+
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,7 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +74,9 @@ TEMPLATES = [
         },
     },
 ]
+
+# Where my custom user model actually is
+AUTH_USER_MODEL = 'account.Account'
 
 WSGI_APPLICATION = 'imageApi.wsgi.application'
 
