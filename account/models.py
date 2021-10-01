@@ -26,6 +26,7 @@ class MyAccountManager(BaseUserManager):
             password=password,
             username=username,
         )
+        user.account_tier = 3
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
