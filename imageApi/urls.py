@@ -14,13 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf.urls.static import static
 
 from imageApi import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # REST FRAMEWORK URLS
+    path('api/image/', include('api.urls', 'image_api')),
 ]
 
 if settings.DEBUG:
