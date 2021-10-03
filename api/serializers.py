@@ -9,9 +9,14 @@ class ImageSerializer(serializers.ModelSerializer):
     '''
     # photo_url = serializers.SerializerMethodField()
 
+    username = serializers.SerializerMethodField('get_username_from_author')
     class Meta:
         model = ImagePost
-        fields = ['author', 'image', 'slug']
+        fields = ['image', 'slug', 'username']
+
+    def get_username_from_author(self, image_post):
+        username = image_post.author.username
+        return username
 
     # def get_photo_url(self, ImagePost):
     #     request = self.context.get('request')

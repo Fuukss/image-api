@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from account.models import Account
 from image.models import ImagePost
@@ -8,6 +9,7 @@ from api.serializers import ImageSerializer
 
 
 @api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
 def api_detail_image_view(request, slug):
     try:
         image_post = ImagePost.objects.get(slug=slug)
@@ -20,8 +22,9 @@ def api_detail_image_view(request, slug):
 
 
 @api_view(['POST', ])
+@permission_classes((IsAuthenticated,))
 def api_create_image_view(request):
-    account = Account.objects.get(pk=1)
+    account = request.user
 
     image_post = ImagePost(author=account)
 
