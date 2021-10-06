@@ -1,10 +1,13 @@
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-from django.conf import settings
+from django.db import models
 from django.db.models.signals import post_save
+
+from django.conf import settings
+
 from django.dispatch import receiver
+
 from rest_framework.authtoken.models import Token
 
 
@@ -41,9 +44,9 @@ class MyAccountManager(BaseUserManager):
 
 class Account(AbstractBaseUser):
     TIER_ACCOUNT = (
-        (1, ('Basic')),
-        (2, ('Premium')),
-        (3, ('Enterprise')),
+        (1, 'Basic'),
+        (2, 'Premium'),
+        (3, 'Enterprise'),
     )
 
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
@@ -62,7 +65,6 @@ class Account(AbstractBaseUser):
     objects = MyAccountManager()
     object = MyAccountManager().all()
 
-
     def __str__(self):
         return self.email + ", " + self.username
 
@@ -71,6 +73,7 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
