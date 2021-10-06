@@ -7,8 +7,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
 
 from image.models import ImagePost
+from plan.model import Plan
 
 from api.serializers import ImageSerializer, ImagePostCreateSerializer
+
 
 CREATE_SUCCESS = 'created'
 
@@ -66,7 +68,8 @@ def api_create_image_view(request):
         data = request.data
         data['author'] = request.user.pk
         serializer = ImagePostCreateSerializer(data=data)
-        account_tier = request.user.account_tier
+        account_tier = str(request.user.account_tier)
+        print(account_tier)
         data = {}
 
         if serializer.is_valid():
@@ -76,20 +79,28 @@ def api_create_image_view(request):
             data['username'] = image_post.author.username
 
             # Basic account
-            if account_tier == 1:
+            if account_tier == 'Basic':
                 data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
 
             # Premium account
-            elif account_tier == 2:
+            elif account_tier == 'Premium':
                 data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
                 data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
                 data['original_link'] = share_link(request, image_post.image)
 
             # Enterprise account
-            elif account_tier == 3:
+            elif account_tier == 'Enterprise':
                 data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
                 data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
                 data['original_link'] = share_link(request, image_post.image)
+
+            elif account_tier not in ('Basic', 'Premium', 'Enterprise'):
+                query_results = Plan.objects.filter(plan_name=account_tier)
+                for query_result in query_results:
+                    thumbnail_widgh = query_result.thumbnail_width
+                    thumbnail_height = query_result.thumbnail_height
+                    original_file = query_result.original_file
+                    expires_link = query_result.expires_link
 
             return Response(data=data)
 

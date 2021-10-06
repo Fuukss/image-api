@@ -10,6 +10,8 @@ from django.dispatch import receiver
 
 from rest_framework.authtoken.models import Token
 
+from plan.model import Plan
+
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, email, username, password=None):
@@ -34,7 +36,7 @@ class MyAccountManager(BaseUserManager):
             password=password,
             username=username,
         )
-        user.account_tier = 3
+        user.account_tier = 'Enterprise'
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
@@ -43,17 +45,15 @@ class MyAccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
-    TIER_ACCOUNT = (
-        (1, 'Basic'),
-        (2, 'Premium'),
-        (3, 'Enterprise'),
-    )
-
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
     date_joined = models.DateTimeField(verbose_name="data joined", auto_now_add=True)
     last_login = models.DateTimeField(verbose_name="last login", auto_now_add=True)
-    account_tier = models.PositiveSmallIntegerField(choices=TIER_ACCOUNT, default=1)
+    account_tier = models.ForeignKey(
+        'plan.Plan',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
