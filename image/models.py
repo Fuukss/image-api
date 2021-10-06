@@ -30,15 +30,15 @@ class ImagePost(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     slug = models.SlugField(blank=True, unique=True)
 
-    image_thumbnail_200 = ImageSpecField(source='image',
-                                         processors=[ResizeToFill(200, 200)],
-                                         format='JPEG',
-                                         options={'quality': 60})
-
-    image_thumbnail_400 = ImageSpecField(source='image',
-                                         processors=[ResizeToFill(400, 400)],
-                                         format='JPEG',
-                                         options={'quality': 60})
+    # image_thumbnail_200 = ImageSpecField(source='image',
+    #                                      processors=[ResizeToFill(200, 200)],
+    #                                      format='JPEG',
+    #                                      options={'quality': 60})
+    #
+    # image_thumbnail_400 = ImageSpecField(source='image',
+    #                                      processors=[ResizeToFill(400, 400)],
+    #                                      format='JPEG',
+    #                                      options={'quality': 60})
 
     def __str__(self):
         return str(self.image)

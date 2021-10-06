@@ -10,7 +10,7 @@ from image.models import ImagePost
 from plan.model import Plan
 
 from api.serializers import ImageSerializer, ImagePostCreateSerializer
-
+from sorl.thumbnail import get_thumbnail
 
 CREATE_SUCCESS = 'created'
 
@@ -25,6 +25,17 @@ def share_link(request, image):
         image_url = image_url[:image_url.rfind("?")]
     return image_url
 
+
+def get_thumbnail_200(image):
+    thumbnail_200 = get_thumbnail(image, '200x200', crop='center', quality=60)
+
+    return thumbnail_200
+
+
+def get_thumbnail_400(image):
+    thumbnail_400 = get_thumbnail(image, '400x400', crop='center', quality=60)
+
+    return thumbnail_400
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
@@ -64,6 +75,7 @@ class ApiImageListView(generics.ListAPIView):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def api_create_image_view(request):
+    global thumbnail_widgh, thumbnail_height, original_file
     if request.method == 'POST':
         data = request.data
         data['author'] = request.user.pk
@@ -80,27 +92,48 @@ def api_create_image_view(request):
 
             # Basic account
             if account_tier == 'Basic':
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
 
             # Premium account
             elif account_tier == 'Premium':
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
-                data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
+
+                thumbnail_400 = get_thumbnail_400(image_post.image)
+                data['image_thumbnail_400'] = share_link(request, thumbnail_400)
+
                 data['original_link'] = share_link(request, image_post.image)
 
             # Enterprise account
             elif account_tier == 'Enterprise':
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
-                data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
+
+                thumbnail_400 = get_thumbnail_400(image_post.image)
+                data['image_thumbnail_400'] = share_link(request, thumbnail_400)
+
                 data['original_link'] = share_link(request, image_post.image)
 
+            # Account plans created by admin
             elif account_tier not in ('Basic', 'Premium', 'Enterprise'):
                 query_results = Plan.objects.filter(plan_name=account_tier)
+
                 for query_result in query_results:
                     thumbnail_widgh = query_result.thumbnail_width
                     thumbnail_height = query_result.thumbnail_height
                     original_file = query_result.original_file
                     expires_link = query_result.expires_link
+
+                size = str(thumbnail_widgh) + 'x' + str(thumbnail_height)
+                thumbnail = get_thumbnail(image_post.image, size, crop='center', quality=60)
+                data['image_thumbnail'] = share_link(request, thumbnail)
+
+                if original_file is True:
+                    data['original_link'] = share_link(request, image_post.image)
+
+                if expires_link is True:
+                    pass
 
             return Response(data=data)
 

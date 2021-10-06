@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'plan',
     'account',
     'image',
+    'sorl.thumbnail',
 
     # Django apps
     'django.contrib.admin',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+
 ]
 
 REST_FRAMEWORK = {
@@ -148,3 +150,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media_cdn')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+THUMBNAIL_FORCE_OVERWRITE = True
