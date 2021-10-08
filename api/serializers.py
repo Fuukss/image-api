@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from image.models import ImagePost
 
 
@@ -32,15 +31,13 @@ class ImagePostCreateSerializer(serializers.ModelSerializer):
         try:
             image = self.validated_data['image']
             slug = self.validated_data['slug']
-
             image_post = ImagePost(
                 author=self.validated_data['author'],
                 slug=slug,
                 image=image,
             )
-
             image_post.save()
             return image_post
 
         except KeyError:
-            raise serializers.ValidationError({"response": "You must have a slug and an image."})
+            raise serializers.ValidationError({"response": "You must have a slug (can be empty) and an image."})

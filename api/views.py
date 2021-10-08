@@ -7,15 +7,17 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
 
 from image.models import ImagePost
+from plan.model import Plan
 
 from api.serializers import ImageSerializer, ImagePostCreateSerializer
+from sorl.thumbnail import get_thumbnail
 
 CREATE_SUCCESS = 'created'
 
 
 def share_link(request, image):
     """
-    Function to share a link
+    Function to share an image link (absolute url)
     request: request, image: model.<image>
     """
     image_url = str(request.build_absolute_uri(image.url))
@@ -24,17 +26,16 @@ def share_link(request, image):
     return image_url
 
 
-@api_view(['GET', ])
-@permission_classes((IsAuthenticated,))
-def api_detail_image_view(request, slug):
-    try:
-        image_post = ImagePost.objects.get(slug=slug)
-    except ImagePost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+# Create thumbnail image with size 200x200
+def get_thumbnail_200(image):
+    thumbnail_200 = get_thumbnail(image, '200x200', crop='center', quality=60)
+    return thumbnail_200
 
-    if request.method == "GET":
-        serializer = ImageSerializer(image_post, context={'request': request})
-        return Response(serializer.data)
+
+# Create thumbnail image with size 400x400
+def get_thumbnail_400(image):
+    thumbnail_400 = get_thumbnail(image, '400x400', crop='center', quality=60)
+    return thumbnail_400
 
 
 # Url: https://<your-domain>/api/blog/list
@@ -56,17 +57,25 @@ class ApiImageListView(generics.ListAPIView):
         return ImagePost.objects.filter(author=user)
 
 
-# TODO: Add token expires in time
+# TODO: Add link expiring in time
 # Url: https://<your-domain>/api/blog/create
 # Headers: Authorization: Token <token>
+# Body: image: image file in png or jpg format and file size less than 2Mb
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def api_create_image_view(request):
+    '''
+    Response for accounts:
+    basic: response, slug, username, thumbnail_200
+    premium: response, slug, username, thumbnail_200, thumbnail_400, original_link
+    enterprise: response, slug, username, thumbnail_200, thumbnail_400, original_link
+    others: response, slug, username, defined thumbnail size for the plan, original image if option is True
+    '''
     if request.method == 'POST':
         data = request.data
         data['author'] = request.user.pk
         serializer = ImagePostCreateSerializer(data=data)
-        account_tier = request.user.account_tier
+        account_tier = str(request.user.account_tier)
         data = {}
 
         if serializer.is_valid():
@@ -76,21 +85,50 @@ def api_create_image_view(request):
             data['username'] = image_post.author.username
 
             # Basic account
-            if account_tier == 1:
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
+            if account_tier == 'Basic':
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
 
             # Premium account
-            elif account_tier == 2:
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
-                data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
+            elif account_tier == 'Premium':
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
+
+                thumbnail_400 = get_thumbnail_400(image_post.image)
+                data['image_thumbnail_400'] = share_link(request, thumbnail_400)
+
                 data['original_link'] = share_link(request, image_post.image)
 
             # Enterprise account
-            elif account_tier == 3:
-                data['image_thumbnail_200'] = share_link(request, image_post.image_thumbnail_200)
-                data['image_thumbnail_400'] = share_link(request, image_post.image_thumbnail_400)
+            elif account_tier == 'Enterprise':
+                thumbnail_200 = get_thumbnail_200(image_post.image)
+                data['image_thumbnail_200'] = share_link(request, thumbnail_200)
+
+                thumbnail_400 = get_thumbnail_400(image_post.image)
+                data['image_thumbnail_400'] = share_link(request, thumbnail_400)
+
                 data['original_link'] = share_link(request, image_post.image)
 
-            return Response(data=data)
+            # Account plans created by admin
+            elif account_tier not in ('Basic', 'Premium', 'Enterprise'):
+                query_results = Plan.objects.filter(plan_name=account_tier)
+
+                for query_result in query_results:
+                    thumbnail_width = query_result.thumbnail_width
+                    thumbnail_height = query_result.thumbnail_height
+                    original_file = query_result.original_file
+                    expires_link = query_result.expires_link
+
+                size = str(thumbnail_width) + 'x' + str(thumbnail_height)
+                thumbnail = get_thumbnail(image_post.image, size, crop='center', quality=60)
+                data['image_thumbnail'] = share_link(request, thumbnail)
+
+                if original_file is True:
+                    data['original_link'] = share_link(request, image_post.image)
+
+                if expires_link is True:
+                    pass
+
+            return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
