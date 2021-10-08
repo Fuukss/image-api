@@ -1,0 +1,29 @@
+[
+   {
+      "model":"plan.plan",
+      "pk":1,
+      "fields":{
+         "plan_name":"Basic",
+         "thumbnail_width":0,
+         "thumbnail_height":0
+      }
+   },
+   {
+      "model":"plan.plan",
+      "pk":2,
+      "fields":{
+         "plan_name":"Premium",
+         "thumbnail_width":0,
+         "thumbnail_height":0
+      }
+   },
+  {
+      "model":"plan.plan",
+      "pk":3,
+      "fields":{
+         "plan_name":"Enterprise",
+         "thumbnail_width":0,
+         "thumbnail_height":0
+      }
+   }
+]
