@@ -17,7 +17,7 @@ CREATE_SUCCESS = 'created'
 
 def share_link(request, image):
     """
-    Function to share a link
+    Function to share an image link (absolute url)
     request: request, image: model.<image>
     """
     image_url = str(request.build_absolute_uri(image.url))
@@ -26,28 +26,16 @@ def share_link(request, image):
     return image_url
 
 
+# Create thumbnail image with size 200x200
 def get_thumbnail_200(image):
     thumbnail_200 = get_thumbnail(image, '200x200', crop='center', quality=60)
-
     return thumbnail_200
 
 
+# Create thumbnail image with size 400x400
 def get_thumbnail_400(image):
     thumbnail_400 = get_thumbnail(image, '400x400', crop='center', quality=60)
-
     return thumbnail_400
-
-@api_view(['GET', ])
-@permission_classes((IsAuthenticated,))
-def api_detail_image_view(request, slug):
-    try:
-        image_post = ImagePost.objects.get(slug=slug)
-    except ImagePost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == "GET":
-        serializer = ImageSerializer(image_post, context={'request': request})
-        return Response(serializer.data)
 
 
 # Url: https://<your-domain>/api/blog/list
@@ -69,19 +57,25 @@ class ApiImageListView(generics.ListAPIView):
         return ImagePost.objects.filter(author=user)
 
 
-# TODO: Add token expires in time
+# TODO: Add link expiring in time
 # Url: https://<your-domain>/api/blog/create
 # Headers: Authorization: Token <token>
+# Body: image: image file in png or jpg format and file size less than 2Mb
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def api_create_image_view(request):
-    global thumbnail_widgh, thumbnail_height, original_file
+    '''
+    Response for accounts:
+    basic: response, slug, username, thumbnail_200
+    premium: response, slug, username, thumbnail_200, thumbnail_400, original_link
+    enterprise: response, slug, username, thumbnail_200, thumbnail_400, original_link
+    others: response, slug, username, defined thumbnail size for the plan, original image if option is True
+    '''
     if request.method == 'POST':
         data = request.data
         data['author'] = request.user.pk
         serializer = ImagePostCreateSerializer(data=data)
         account_tier = str(request.user.account_tier)
-        print(account_tier)
         data = {}
 
         if serializer.is_valid():
@@ -120,12 +114,12 @@ def api_create_image_view(request):
                 query_results = Plan.objects.filter(plan_name=account_tier)
 
                 for query_result in query_results:
-                    thumbnail_widgh = query_result.thumbnail_width
+                    thumbnail_width = query_result.thumbnail_width
                     thumbnail_height = query_result.thumbnail_height
                     original_file = query_result.original_file
                     expires_link = query_result.expires_link
 
-                size = str(thumbnail_widgh) + 'x' + str(thumbnail_height)
+                size = str(thumbnail_width) + 'x' + str(thumbnail_height)
                 thumbnail = get_thumbnail(image_post.image, size, crop='center', quality=60)
                 data['image_thumbnail'] = share_link(request, thumbnail)
 
@@ -135,6 +129,6 @@ def api_create_image_view(request):
                 if expires_link is True:
                     pass
 
-            return Response(data=data)
+            return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
