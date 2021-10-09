@@ -19,7 +19,7 @@ class ImagePost(models.Model):
     image = models.ImageField(upload_to=upload_location, null=False, blank=False,
                               validators=[image_size, validate_file_extension])
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    slug = models.SlugField(blank=True, unique=True)
+    slug = models.SlugField(blank=True, unique=False)
 
     def __str__(self):
         return str(self.image).lower()

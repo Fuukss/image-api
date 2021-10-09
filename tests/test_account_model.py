@@ -3,26 +3,26 @@ from account.models import Account
 
 
 class TestAccountModel(APITestCase):
-    def test_creates_user(self):
+    def test_create_user(self):
         user = Account.objects.create_user(email='rafal19fuchs@gmail.com', username='rafalfuchs',
                                            password='Password1!')
         self.assertIsInstance(user, Account)
         self.assertEqual(user.email, 'rafal19fuchs@gmail.com')
 
-    def test_raises_error_when_no_email_is_supplied(self):
+    def test_raises_error_when_no_email(self):
         self.assertRaises(ValueError, Account.objects.create_user, email='', username='rafalfuchs',
                           password='Password1!')
 
-    def test_raises_error_with_message_when_no_email_is_supplied(self):
+    def test_raises_error_with_message_when_no_email(self):
         with self.assertRaisesMessage(ValueError, "The given email must be set"):
             Account.objects.create_user(email='', username='rafalfuchs',
                                         password='Password1!')
 
-    def test_raises_error_when_no_username_is_supplied(self):
+    def test_raises_error_when_no_username(self):
         self.assertRaises(ValueError, Account.objects.create_user, email='rafalfuchs', username='',
                           password='Password1!')
 
-    def test_raises_error_with_message_when_no_username_is_supplied(self):
+    def test_raises_error_with_message_when_no_username(self):
         with self.assertRaisesMessage(ValueError, "The given username must be set"):
             Account.objects.create_user(email='rafal19fuchs@gmail.com', username='',
                                         password='Password1!')
