@@ -5,10 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
-
 from image.models import ImagePost
 from plan.model import Plan
-
 from api.serializers import ImageSerializer, ImagePostCreateSerializer
 from sorl.thumbnail import get_thumbnail
 
@@ -58,7 +56,7 @@ class ApiImageListView(generics.ListAPIView):
 
 
 # TODO: Add link expiring in time
-# Url: https://<your-domain>/api/blog/create
+# Url: https://<your-domain>/api/image/create
 # Headers: Authorization: Token <token>
 # Body: image: image file in png or jpg format and file size less than 2Mb
 @api_view(['POST'])

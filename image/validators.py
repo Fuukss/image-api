@@ -5,7 +5,7 @@ IMAGE_SIZE_MAX_BYTES = 2000000
 IMAGE_SIZE_EMPTY = 0
 
 
-# Function to validate image field in model
+# Function to validate image size in model
 def image_size(image):
     file_size = image.size
 

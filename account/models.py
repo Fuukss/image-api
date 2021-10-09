@@ -29,8 +29,7 @@ class MyAccountManager(BaseUserManager):
 
     def create_superuser(self, email, username, password):
         '''
-        Create super user account and set
-        special fields automatically on true.
+        Create super user account and set special fields automatically on true.
 
         The account tier field must be updated after adding user plans (basic, premium, enterprise, etc).
         Check readme.md and use initial_role_data.json file.
