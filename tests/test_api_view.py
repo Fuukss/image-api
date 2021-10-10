@@ -6,10 +6,13 @@ from PIL import Image
 from django.core.files.base import File
 from account.models import Account
 from plan.model import Plan
+from django.test import override_settings
+
+TEST_DIR = 'test_data'
 
 
+@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
 class TestApiCreateImageView(APITestCase):
-
     @staticmethod
     def get_image_file(name, size, ext='png', color=(256, 0, 0)):
         file_obj = BytesIO()
@@ -51,6 +54,22 @@ class TestApiCreateImageView(APITestCase):
         self.user_other.save()
         self.user_other_original.save()
         self.image = self.get_image_file(name='test.jpg', size=(50, 50))
+
+    def tearDownModule(self):
+        print("\nDeleting temporary files...\n")
+        try:
+            self.plan_basic.delete()
+            self.plan_premium.delete()
+            self.plan_enterprise.delete()
+            self.plan_other.delete()
+            self.plan_other_original_file.delete()
+            self.user_basic.delete()
+            self.user_premium.delete()
+            self.user_enterprise.delete()
+            self.user_other.delete()
+            self.user_other_original.delete()
+        except OSError:
+            pass
 
     def test_api_create_image_unauthorization(self):
         response = self.client.post('/api/image/create')
@@ -102,7 +121,6 @@ class TestApiCreateImageView(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         data = self.image
         response = client.post('/api/image/create', {"image": data}, format='multipart')
-        print(response)
         assert response.status_code == 400
 
     def test_api_image_list_view(self):
