@@ -61,6 +61,7 @@ class TestImagePostSerializer(APITestCase):
                                            password='Password1!')
         self.image = ImagePost.objects.create(image=self.get_image_file(), author=user, slug='')
         self.serializer = ImagePostCreateSerializer(instance=self.image)
+        user.delete()
 
     def test_save_image_post(self):
         data = self.serializer.data

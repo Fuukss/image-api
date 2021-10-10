@@ -8,6 +8,7 @@ class TestAccountModel(APITestCase):
                                            password='Password1!')
         self.assertIsInstance(user, Account)
         self.assertEqual(user.email, 'rafal19fuchs@gmail.com')
+        user.delete()
 
     def test_raises_error_when_no_email(self):
         self.assertRaises(ValueError, Account.objects.create_user, email='', username='rafalfuchs',
