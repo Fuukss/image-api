@@ -5,8 +5,10 @@ IMAGE_SIZE_MAX_BYTES = 2000000
 IMAGE_SIZE_EMPTY = 0
 
 
-# Function to validate image size in model
 def image_size(image):
+    """
+    Validate image by file size.
+    """
     file_size = image.size
 
     if file_size > IMAGE_SIZE_MAX_BYTES:
@@ -20,8 +22,10 @@ def image_size(image):
         return image
 
 
-# Function to validate image format in model
 def validate_file_extension(image):
+    """
+    Validate image by format.
+    """
     ext = os.path.splitext(image.name)[1]  # [0] returns path+filename
     valid_extensions = ['.jpg', '.png']
     if not ext.lower() in valid_extensions:

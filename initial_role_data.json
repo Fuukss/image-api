@@ -1,29 +1,51 @@
 [
    {
-      "model":"plan.plan",
+      "model":"plan.ThumbnailPlan",
       "pk":1,
       "fields":{
-         "plan_name":"Basic",
-         "thumbnail_width":0,
-         "thumbnail_height":0
+         "thumbnail_id":"1",
+         "thumbnail_width":200,
+         "thumbnail_height":200
       }
    },
    {
-      "model":"plan.plan",
+      "model":"plan.ThumbnailPlan",
       "pk":2,
       "fields":{
-         "plan_name":"Premium",
-         "thumbnail_width":0,
-         "thumbnail_height":0
+         "thumbnail_id":"2",
+         "thumbnail_width":400,
+         "thumbnail_height":400
       }
    },
-  {
-      "model":"plan.plan",
-      "pk":3,
-      "fields":{
-         "plan_name":"Enterprise",
-         "thumbnail_width":0,
-         "thumbnail_height":0
+   {
+      "model": "plan.Plan",
+      "pk": 1,
+      "fields": {
+         "plan_name": "Basic",
+         "thumbnail_name": "1",
+         "original_file": 0,
+         "expires_link": 0
+      }
+   },
+   {
+      "model": "plan.Plan",
+      "pk": 2,
+      "fields": {
+         "plan_name": "Premium",
+         "thumbnail_name": ["1", "2"],
+         "original_file": 1,
+         "expires_link": 0
+      }
+   },
+   {
+      "model": "plan.Plan",
+      "pk": 3,
+      "fields": {
+         "plan_name": "Enterprise",
+         "thumbnail_name": ["1", "2"],
+         "original_file": 1,
+         "expires_link": 1
       }
    }
 ]
+

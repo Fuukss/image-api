@@ -9,10 +9,11 @@ image/__pycache__
 image/migrations/__pycache__
 image/migrations/0001_initial.py
 image/migrations/0002_alter_imagepost_slug.py
-imageApi/__pycache__
-imageApi/migrations/__pycache__
+app/__pycache__
+app/migrations/__pycache__
 plan/__pycache__
 plan/migrations/__pycache__
+.media_cdn/
 plan/migrations/0001_initial.py
 db.sqlite3
 .DS_Store

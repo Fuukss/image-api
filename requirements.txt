@@ -2,8 +2,7 @@ django==3.2.7
 djangorestframework==3.11.2
 Markdown==3.2.1
 Pillow==8.3.2
-opencv-python-headless
 django-imagekit
-opencv-python~=4.5.3.56
-opencv-python--headless
-sorl-thumbnail
+sorl-thumbnail==12.7.0
+coreapi==2.3.3
+psycopg2>=2.7,<3.0

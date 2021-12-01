@@ -26,7 +26,7 @@ class TestAccountModel(APITestCase):
         user = Account.objects.create_user(email='rafal19fuchs@gmail.com', username='rafalfuchs',
                                            password='Password1!')
 
-        image = ImagePost.objects.create(image=self.get_image_file(), author=user, slug='')
+        image = ImagePost.objects.create(image=self.get_image_file(), author=user)
         self.assertEqual(image.__str__(), str(image))
         image.delete()
 
