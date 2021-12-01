@@ -13,7 +13,3 @@ ADD . /image_service/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
-
-# Fixed CV2. 2nd option. Sometimes works, sometimes not
-RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6  -y
