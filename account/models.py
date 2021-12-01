@@ -1,39 +1,35 @@
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import BaseUserManager
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.conf import settings
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-from plan.model import Plan
+from .validator import email_validator, username_validator
 
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self, email, username, password=None):
-        '''
+    def create_user(self, email: str, username: str, password: str = None) -> object:
+        """
         Set basic information about account and check
         email and username values
-        '''
-        if not email:
-            raise ValueError("The given email must be set")
-        if not username:
-            raise ValueError("The given username must be set")
+        """
+        email_validator(email)
+        username_validator(username)
 
         user = self.model(
             email=self.normalize_email(email),
+            password=password,
             username=username,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, password):
-        '''
+    def create_superuser(self, email: str, username: str, password: str) -> object:
+        """
         Create super user account and set special fields automatically on true.
-
-        The account tier field must be updated after adding user plans (basic, premium, enterprise, etc).
-        Check readme.md and use initial_role_data.json file.
-        '''
+        """
         user = self.create_user(
             email=self.normalize_email(email),
             password=password,
@@ -47,6 +43,9 @@ class MyAccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
+    """
+    Abstract representation of user account data.
+    """
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
     date_joined = models.DateTimeField(verbose_name="data joined", auto_now_add=True)
@@ -75,9 +74,15 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
+    def get_account_tier(self):
+        return self.account_tier
 
-# After create user add him token to account
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
+    """
+    After adding the user, assign a token to him.
+    """
     if created:
         Token.objects.create(user=instance)
+
