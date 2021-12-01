@@ -29,7 +29,7 @@ class TestImageSerializer(APITestCase):
         }
         user = Account.objects.create_user(email='testname@gmail.com', username='testname',
                                            password='Password1!')
-        self.image = ImagePost.objects.create(image=self.get_image_file(), author=user, slug='')
+        self.image = ImagePost.objects.create(image=self.get_image_file(), author=user)
         self.serializer = ImageSerializer(instance=self.image)
 
     def test_contains_expected_fields(self):
