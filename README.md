@@ -3,15 +3,7 @@
 ## Setup
 To run this project:
 ```
-$ python manage.py makemigrations
-$ python manage.py migrate 
-$ python manage.py createsuperuser 
-```
-
-## Optional 
-For creating basic user plans: Basic, Premium, Enterprise
-```
-$ python manage.py loaddata initial_role_data.json
+$ docker exec -it image_service python manage.py createsuperuser
 ```
 
 ## Run the app 
@@ -37,13 +29,24 @@ To authenticate an API request, you should provide your API token in the Authori
         -Authorization: Token <token>
     Body: 
         -image: image file in png or jpg format and file size less than 2Mb 
-        -slug: slug name or empty string
 
     Response for accounts:
-    - basic: response, slug, username, thumbnail_200
-    - premium: response, slug, username, thumbnail_200, thumbnail_400, original_link
-    - enterprise: response, slug, username, thumbnail_200, thumbnail_400, original_link
-    - others: response, slug, username, defined thumbnail size for the plan, original image if option is True
+    - basic: 
+        * a link to a thumbnail that's 200px in height
+    - premium: 
+        * a link to a thumbnail that's 200px in height
+        * a link to a thumbnail that's 400px in height
+        * a link to the originally uploaded image
+    - enterprise: 
+        * a link to a thumbnail that's 200px in height
+        * a link to a thumbnail that's 400px in height
+        * a link to the originally uploaded image
+        # TODO:
+        * ability to fetch a link that expires after a number of seconds (user can specify any number between 300 and 30000)
+    - plans created by admin:
+        * links to a selected thumbnails  
+        * optional: a link to the originally uploaded image 
+        * optional: a link expires in time
     
 ## GET a list of images  
     Url: https://<your-domain>/api/blog/list
