@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import ProtectedError
-from django.db.models.signals import post_save, post_delete, pre_delete
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from .validators import check_size_value
 
@@ -52,19 +52,25 @@ class Plan(models.Model):
         return self.expires_link
 
 
-@receiver(pre_delete, sender=Plan)
+# TODO: Add update signal - after initialization data!
+@receiver([pre_delete], sender=Plan)
 def default_plan_handler(sender, instance, **kwargs):
     """
     Signal for unable deleted basics plans.
     """
     if instance.plan_name in ["Basic", "Premium", "Enterprise"]:
         raise ProtectedError('The General user plan can not be deleted', instance)
+    # if not instance._state.adding:
+    #     raise ProtectedError('The General thumbnail plan can not be changed', instance)
 
 
-@receiver(pre_delete, sender=ThumbnailPlan)
+@receiver([pre_delete], sender=ThumbnailPlan)
 def default_thumbnail_plan_handler(sender, instance, **kwargs):
     """
     Signal for unable deleted basics thumbnail plans.
     """
-    if instance.thumbnail_id in [1, 2]:
+    if instance.thumbnail_width == "200" and instance.thumbnail_height == "200" or \
+            instance.thumbnail_width == "400" and instance.thumbnail_height == "400":
         raise ProtectedError('The General thumbnail plan can not be deleted', instance)
+    # if not instance._state.adding:
+    #     raise ProtectedError('The General thumbnail plan can not be changed', instance)
