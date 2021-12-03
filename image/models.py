@@ -1,11 +1,11 @@
+import os
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from image.validators import image_size, validate_file_extension
-from sorl.thumbnail import delete, ImageField
+from sorl.thumbnail import delete
 from sorl.thumbnail import get_thumbnail
-import os, sys
 
 
 def share_link(request, image):
@@ -30,12 +30,33 @@ def upload_location(instance, filename, **kwargs):
     return file_path
 
 
+def upload_location_for_expires_images(instance, filename, **kwargs):
+    """
+    Create a file save path based on the user name and file name
+    """
+    filename = filename.split('/')[-1]
+    file_path = 'expires/{author_name}/{filename}'.format(
+        author_name=str(instance.author.username),
+        filename=str(filename)
+    )
+    return file_path
+
+
 def drop_empty_folders(directory):
     """Verify that every empty folder removed in local storage."""
 
     for dir_path, dir_names, file_names in os.walk(directory, topdown=False):
         if not dir_names and not file_names:
             os.rmdir(dir_path)
+
+
+class ExpiringImagePost(models.Model):
+    created_at = models.DateField(auto_now_add=True, db_index=True)
+    image = models.ImageField(upload_to=upload_location_for_expires_images, null=False, blank=False)
+    author = models.CharField(max_length=55)
+
+    def __str__(self):
+        return str(self.image).lower()
 
 
 class ImagePost(models.Model):
@@ -65,15 +86,11 @@ class ImagePost(models.Model):
             return share_link(request, self.image)
         return None
 
-    def get_expires_link(self, request, expiration_seconds=60):
+    def get_original_expires_image(self, request):
         if self.image:
-            original_image = self.image
-            last_modified_time = os.path.getmtime(original_image)
-            if last_modified_time >= expiration_seconds:
-                # delete the file
-                os.remove(original_image)
-                return share_link(request, original_image)
-            return None
+            expires_image = ExpiringImagePost(image=self.image.file, author=self.author)
+            expires_image.save()
+            return share_link(request, expires_image.image)
 
 
 @receiver(post_delete, sender=ImagePost)

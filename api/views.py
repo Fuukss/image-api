@@ -52,12 +52,16 @@ def api_create_image_view(request):
             for available_thumbnails in user_plan:
                 available_sizes = available_thumbnails.get_thumbnail_plan()
                 original_file = available_thumbnails.get_original_file()
+                expires_image = available_thumbnails.get_expires_link()
 
                 for available_size in available_sizes:
                     data[available_size] = image_post.get_a_thumbnail(request, available_size)
 
                 if original_file is True:
                     data['original image:'] = image_post.get_original_image(request)
+
+                if expires_image is True:
+                    data['expires image'] = image_post.get_original_expires_image(request)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
