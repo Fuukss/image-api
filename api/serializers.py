@@ -32,12 +32,35 @@ class ImagePostCreateSerializer(serializers.ModelSerializer):
     def save(self):
         try:
             image = self.validated_data['image']
+            author = self.validated_data['author']
             image_post = ImagePost(
-                author=self.validated_data['author'],
+                author=author,
                 image=image,
             )
             image_post.save()
             return image_post
-
         except KeyError:
             raise serializers.ValidationError({"response": "You must have an image."})
+
+
+class ImageExpiringPostCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImagePost
+        fields = ['image', 'author', 'expires_time']
+
+    def save(self):
+        try:
+            image = self.validated_data['image']
+            author = self.validated_data['author']
+            expires_time = self.validated_data['expires_time']
+            image_post = ImagePost(
+                author=author,
+                image=image,
+                expires_time=expires_time,
+            )
+            image_post.save()
+            return image_post
+        except KeyError:
+            raise serializers.ValidationError({"response": "You must have an image."})
+
+

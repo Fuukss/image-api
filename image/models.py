@@ -1,4 +1,6 @@
 import os
+from datetime import datetime, timedelta
+
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_delete
@@ -54,6 +56,7 @@ class ExpiringImagePost(models.Model):
     created_at = models.DateField(auto_now_add=True, db_index=True)
     image = models.ImageField(upload_to=upload_location_for_expires_images, null=False, blank=False)
     author = models.CharField(max_length=55)
+    time = models.IntegerField(blank=False, null=False, default=0)
 
     def __str__(self):
         return str(self.image).lower()
@@ -66,6 +69,7 @@ class ImagePost(models.Model):
     image = models.ImageField(upload_to=upload_location, null=False, blank=False,
                               validators=[image_size, validate_file_extension])
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    expires_time = models.IntegerField(blank=True, null=True, default=0)
 
     def __str__(self):
         return str(self.image).lower()
@@ -88,7 +92,7 @@ class ImagePost(models.Model):
 
     def get_original_expires_image(self, request):
         if self.image:
-            expires_image = ExpiringImagePost(image=self.image.file, author=self.author)
+            expires_image = ExpiringImagePost(image=self.image.file, author=self.author, time=self.expires_time)
             expires_image.save()
             return share_link(request, expires_image.image)
 

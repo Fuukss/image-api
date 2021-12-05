@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
 from image.models import ImagePost
 from plan.model import Plan
-from api.serializers import ImageSerializer, ImagePostCreateSerializer
+from api.serializers import ImageSerializer, ImagePostCreateSerializer, ImageExpiringPostCreateSerializer
 
 
 @permission_classes((IsAuthenticated,))
@@ -41,7 +41,12 @@ def api_create_image_view(request):
     if request.method == 'POST':
         data = request.data
         data['author'] = request.user.pk
-        serializer = ImagePostCreateSerializer(data=data)
+
+        if 'expires_time' in data:
+            serializer = ImageExpiringPostCreateSerializer(data=data)
+        else:
+            serializer = ImagePostCreateSerializer(data=data)
+
         account_tier = str(request.user.get_account_tier())
         data = {}
 
@@ -54,12 +59,15 @@ def api_create_image_view(request):
                 original_file = available_thumbnails.get_original_file()
                 expires_image = available_thumbnails.get_expires_link()
 
+                # check all available thumbnails plans and add url to response
                 for available_size in available_sizes:
                     data[available_size] = image_post.get_a_thumbnail(request, available_size)
 
+                # add original url if plan has this option
                 if original_file is True:
                     data['original image:'] = image_post.get_original_image(request)
 
+                # add expires image url if plan has this option
                 if expires_image is True:
                     data['expires image'] = image_post.get_original_expires_image(request)
 
