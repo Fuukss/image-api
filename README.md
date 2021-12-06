@@ -1,14 +1,14 @@
 # Image-api
 
-## Setup
-To run this project:
-```
-$ docker exec -it image_service python manage.py createsuperuser
-```
 
 ## Run the app 
 ```
 $ docker-compose up --build
+```
+## Setup
+To run this project:
+```
+$ docker exec -it imageapi_app_1 python manage.py createsuperuser
 ```
 
 ## Run the tests
