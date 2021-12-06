@@ -1,6 +1,4 @@
 import os
-from datetime import datetime, timedelta
-
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_delete
@@ -106,4 +104,6 @@ def submission_delete(sender, instance, *args, **kwargs):
         image = ImagePost
         image.delete_thumbnail(instance)
     finally:
-        drop_empty_folders("media_cdn/CACHE/")
+        drop_empty_folders("media/expires")
+        drop_empty_folders("media/CACHE")
+        drop_empty_folders("media/image")

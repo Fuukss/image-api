@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+from celery.schedules import crontab
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'account',
     'image',
     'sorl.thumbnail',
+    # 'django_celery_beat',
 
     # Django apps
     'django.contrib.admin',
@@ -112,7 +114,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -163,5 +164,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 THUMBNAIL_FORCE_OVERWRITE = True
 THUMBNAIL_PREFIX = 'CACHE/'
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
