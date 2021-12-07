@@ -1,10 +1,10 @@
 # Image-api
 
-
 ## Run the app 
 ```
 $ docker-compose up --build
 ```
+
 ## Setup
 To run this project:
 ```
@@ -28,7 +28,8 @@ To authenticate an API request, you should provide your API token in the Authori
     Headers: 
         -Authorization: Token <token>
     Body: 
-        -image: image file in png or jpg format and file size less than 2Mb 
+        - image: image file in png or jpg format and file size less than 2Mb 
+        - expire_time: integer. If user account have option for links expiring in time, can choice expiring time in request in seconds.
 
     Response for accounts:
     - basic: 
@@ -41,7 +42,6 @@ To authenticate an API request, you should provide your API token in the Authori
         * a link to a thumbnail that's 200px in height
         * a link to a thumbnail that's 400px in height
         * a link to the originally uploaded image
-        # TODO:
         * ability to fetch a link that expires after a number of seconds (user can specify any number between 300 and 30000)
     - plans created by admin:
         * links to a selected thumbnails  
