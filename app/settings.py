@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
-from celery.schedules import crontab
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +36,7 @@ INSTALLED_APPS = [
     'account',
     'image',
     'sorl.thumbnail',
-    # 'django_celery_beat',
+    'django_celery_beat',
 
     # Django apps
     'django.contrib.admin',
@@ -164,6 +163,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 THUMBNAIL_FORCE_OVERWRITE = True
 THUMBNAIL_PREFIX = 'CACHE/'
 
+# THUMBNAIL_BACKEND = 'sorl.thumbnail.base.ThumbnailBackend'
+# THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
@@ -171,3 +173,10 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
+
+CELERY_BEAT_SCHEDULE = {
+    'delete_expiring_in_time_images': {
+        'task': 'delete_images',
+        'schedule': 1.0,
+    },
+}
