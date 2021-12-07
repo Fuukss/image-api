@@ -1,6 +1,8 @@
 FROM python:3.7-alpine
 
 ENV PYTHONUNBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE app.settings
+
 COPY ./requirements.txt /requirements.txt
 
 RUN apk add --update --no-cache postgresql-client jpeg-dev
@@ -13,3 +15,4 @@ RUN apk del .tmp-build-deps
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
+
