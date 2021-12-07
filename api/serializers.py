@@ -24,7 +24,28 @@ class ImageSerializer(serializers.ModelSerializer):
         return '%s%s' % ('http://localhost:8000', new_url)
 
 
-class ImagePostCreateSerializer(serializers.ModelSerializer):
+class DynamicFieldsModelSerializer(serializers.ModelSerializer):
+    """
+    A ModelSerializer that takes an additional `fields` argument that
+    controls which fields should be displayed.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Don't pass the 'fields' arg up to the superclass
+        fields = kwargs.pop('fields', None)
+
+        # Instantiate the superclass normally
+        super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
+
+        if fields is not None:
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class ImagePostCreateSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = ImagePost
         fields = ['image', 'author']
@@ -41,26 +62,4 @@ class ImagePostCreateSerializer(serializers.ModelSerializer):
             return image_post
         except KeyError:
             raise serializers.ValidationError({"response": "You must have an image."})
-
-
-class ImageExpiringPostCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ImagePost
-        fields = ['image', 'author', 'expires_time']
-
-    def save(self):
-        try:
-            image = self.validated_data['image']
-            author = self.validated_data['author']
-            expires_time = self.validated_data['expires_time']
-            image_post = ImagePost(
-                author=author,
-                image=image,
-                expires_time=expires_time,
-            )
-            image_post.save()
-            return image_post
-        except KeyError:
-            raise serializers.ValidationError({"response": "You must have an image."})
-
 
