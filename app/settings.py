@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'account',
     'image',
     'sorl.thumbnail',
+    'django_celery_beat',
 
     # Django apps
     'django.contrib.admin',
@@ -104,10 +105,10 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
         'PORT': 5432,
     }
 }
@@ -161,3 +162,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 THUMBNAIL_FORCE_OVERWRITE = True
 THUMBNAIL_PREFIX = 'CACHE/'
+
+# THUMBNAIL_BACKEND = 'sorl.thumbnail.base.ThumbnailBackend'
+# THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
+CELERY_BEAT_SCHEDULE = {
+    'delete_expiring_in_time_images': {
+        'task': 'delete_images',
+        'schedule': 1.0,
+    },
+}

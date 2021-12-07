@@ -1,15 +1,18 @@
-FROM python:3.6
+FROM python:3.7-alpine
 
 ENV PYTHONUNBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE app.settings
 
-# create root directory for our project in the container
-RUN mkdir /image_service
+COPY ./requirements.txt /requirements.txt
 
-# Set the working directory to /image_service
-WORKDIR /image_service
+RUN apk add --update --no-cache postgresql-client jpeg-dev
 
-# Copy the current directory contents into the container at /image_service
-ADD . /image_service/
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+    gcc libc-dev linux-headers postgresql-dev musl-dev zlib zlib-dev
+RUN pip install -r /requirements.txt
+RUN apk del .tmp-build-deps
 
-# Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+RUN mkdir /app
+COPY . /app
+WORKDIR /app
+

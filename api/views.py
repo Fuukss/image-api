@@ -39,9 +39,9 @@ def api_create_image_view(request):
     Body: image: image file in png or jpg format and file size less than 2Mb
     """
     if request.method == 'POST':
-        data = request.data
-        data['author'] = request.user.pk
-        serializer = ImagePostCreateSerializer(data=data)
+        request_data = request.data
+        request_data['author'] = request.user.pk
+        serializer = ImagePostCreateSerializer(data=request_data)
         account_tier = str(request.user.get_account_tier())
         data = {}
 
@@ -54,14 +54,18 @@ def api_create_image_view(request):
                 original_file = available_thumbnails.get_original_file()
                 expires_image = available_thumbnails.get_expires_link()
 
+                # check all available thumbnails plans and add url to response
                 for available_size in available_sizes:
                     data[available_size] = image_post.get_a_thumbnail(request, available_size)
 
+                # add original url if plan has this option
                 if original_file is True:
                     data['original image:'] = image_post.get_original_image(request)
 
-                if expires_image is True:
-                    data['expires image'] = image_post.get_original_expires_image(request)
+                # add expires image url if plan has this option
+                if expires_image is True and 'expires_time' in request_data.keys():
+                    time_out_url = request_data['expires_time']
+                    data['expires image'] = image_post.get_original_expires_image(request, time_out_url)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
