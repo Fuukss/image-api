@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from image.validators import image_size, validate_file_extension
 from sorl.thumbnail import delete
 from sorl.thumbnail import get_thumbnail
+from django.utils import timezone
 
 
 def share_link(request, image):
@@ -53,13 +54,21 @@ def drop_empty_folders(directory):
 
 
 class ExpiringImagePost(models.Model):
-    created_at = models.DateTimeField(default=datetime.now, blank=True)
+    create_image_time = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    delete_image_time = models.DateTimeField(default=timezone.now, null=True, blank=True)
     image = models.ImageField(upload_to=upload_location_for_expires_images, null=False, blank=False)
     author = models.CharField(max_length=55)
     time = models.IntegerField(blank=False, null=False, default=0)
 
     def __str__(self):
         return str(self.image).lower()
+
+    @property
+    def get_delete_at(self):
+        return self.create_image_time + timedelta(seconds=int(self.time))
+
+    def save(self, *args, **kwargs):
+        self.delete_image_time = self.get_delete_at
 
 
 class ImagePost(models.Model):
