@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import os
 from pathlib import Path
+import os
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'account',
     'image',
     'sorl.thumbnail',
-    'django_celery_beat',
 
     # Django apps
     'django.contrib.admin',
@@ -47,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+
+    'django_celery_beat',
 
 ]
 
@@ -113,6 +114,10 @@ DATABASES = {
     }
 }
 
+# Celery settings
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", "redis://127.0.0.1:6379/0")
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -136,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
 
@@ -163,20 +168,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 THUMBNAIL_FORCE_OVERWRITE = True
 THUMBNAIL_PREFIX = 'CACHE/'
 
-# THUMBNAIL_BACKEND = 'sorl.thumbnail.base.ThumbnailBackend'
-# THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
-
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 
 CELERY_BEAT_SCHEDULE = {
-    'delete_expiring_in_time_images': {
-        'task': 'delete_images',
-        'schedule': 1.0,
+    "delete-expires-images": {
+        "task": "image.tasks.delete_expired_images",
+        "schedule": 5.0,
     },
 }
