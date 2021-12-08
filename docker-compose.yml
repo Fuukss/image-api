@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app
+      - .:/app/
     command: >
       sh -c "python3 manage.py makemigrations &&
              python3 manage.py migrate &&
@@ -34,7 +34,6 @@ services:
 
   redis:
     image: redis:alpine
-    command: redis-server
 
   celery:
     restart: always
@@ -42,7 +41,7 @@ services:
       context: .
     command: celery -A app worker -l info
     volumes:
-      - ./app
+      - .:/app
     env_file:
       - ./.env.dev
     links:
@@ -54,7 +53,6 @@ services:
       - app
     labels:
       io.rancher.container.pull_image: 'always'
-
 
 volumes:
   pgdata:
