@@ -3,6 +3,7 @@ version: '3'
 services:
 
   app:
+    container_name: djagno
     restart: always
     build:
       context: .
@@ -23,7 +24,9 @@ services:
     depends_on:
       - db
       - redis
+
   db:
+    container_name: postgres
     image: postgres:10-alpine
     env_file:
       - ./.env.dev
@@ -33,10 +36,11 @@ services:
       - "5432:5432"
 
   redis:
+    container_name: redis
     image: redis:alpine
 
-  celery:
-    restart: always
+  celeryworker:
+    container_name: celeryworker
     build:
       context: .
     command: celery -A app worker -l info
@@ -51,8 +55,26 @@ services:
       - db
       - redis
       - app
+    restart: always
     labels:
       io.rancher.container.pull_image: 'always'
+
+  celerybeat:
+    container_name: celerybeat
+    build:
+      context: .
+    command:  celery -A app beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env.dev
+    links:
+      - db:db
+      - redis:redis
+    depends_on:
+      - db
+      - redis
+      - celeryworker
 
 volumes:
   pgdata:

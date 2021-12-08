@@ -1,16 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
+from django.conf import settings
 
-
-# Default Django settings module for Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
 app = Celery('app', broker='redis://redis:6379/0')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-
-
-@app.task(name='delete_images')
-def delete_images():
-    print("KURWA")
+app.config_from_object(settings, namespace='CELERY')
+app.autodiscover_tasks(settings.INSTALLED_APPS)
