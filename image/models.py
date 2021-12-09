@@ -68,8 +68,7 @@ class ExpiringImagePost(models.Model):
         return self.create_image_time + timedelta(seconds=int(self.time))
 
     def delete_image(self):
-        self.delete()
-
+        delete(self.image)
 
 class ImagePost(models.Model):
     """
@@ -111,9 +110,19 @@ def submission_delete(sender, instance, *args, **kwargs):
     Signal for delete all thumbnails created based on deleted image.
     """
     try:
+        print(instance)
         image = ImagePost
         image.delete_thumbnail(instance)
     finally:
         drop_empty_folders("media/expires")
         drop_empty_folders("media/CACHE")
         drop_empty_folders("media/image")
+
+
+@receiver(post_delete, sender=ExpiringImagePost)
+def submission_delete(sender, instance, *args, **kwargs):
+    """
+    Signal for delete expired image.
+    """
+    image = ExpiringImagePost
+    image.delete_image(instance)
