@@ -8,3 +8,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 app = Celery('app', broker='redis://redis:6379/0')
 app.config_from_object(settings, namespace='CELERY')
 app.autodiscover_tasks(settings.INSTALLED_APPS)
+
+app.conf.beat_schedule = {
+    'delete-expires-images': {
+        'task': 'image.tasks.delete_expired_images',
+        'schedule': 5.0,
+    },
+}

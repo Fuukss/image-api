@@ -1,4 +1,4 @@
-from celery import shared_task, task
+from celery import task
 from image.models import ExpiringImagePost
 from django.utils import timezone
 

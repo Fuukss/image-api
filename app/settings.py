@@ -173,9 +173,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 
-CELERY_BEAT_SCHEDULE = {
-    "delete-expires-images": {
-        "task": "image.tasks.delete_expired_images",
-        "schedule": 5.0,
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "delete-expires-images": {
+#         "task": "image.tasks.delete_expired_images",
+#         "schedule": 5.0,
+#     },
+# }
