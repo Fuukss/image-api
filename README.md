@@ -5,15 +5,32 @@
 $ docker-compose up --build
 ```
 
+## Error starting
+```
+ERROR: ... Bind for 0.0.0.0:5432 failed: port is already allocated
+
+This 👇 works for me.
+ 
+$ docker-compose down
+$ docker rm -fv $(docker ps -aq)
+$ sudo lsof -i -P -n | grep 5432
+
+- For mac 
+$ kill -9 <process id>
+
+- For Linux
+$ sudo kill <proces id>
+```
+
 ## Setup
 To run this project:
 ```
-$ docker exec -it imageapi_app_1 python manage.py createsuperuser
+$ docker exec -it django python manage.py createsuperuser
 ```
 
 ## Run the tests
 ```
-$ pip install coverage 
+$ docker exec -it django sh
 $ coverage run manage.py test && coverage report && coverage html
 ```
 
